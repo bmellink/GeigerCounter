@@ -32,15 +32,15 @@
 
 */
 
-#include <TFT_eSPI.h>             // Hardware-specific library for TFT
+#include <TFT_eSPI.h>       // Hardware-specific library for TFT display
 #include <SPI.h>
-#include "radiation64.h"          // icon file with yellow radiation symbol
+#include "radiation64.h"    // icon file with yellow radiation symbol
 
 // Define Hardware PIN numbers
-#define PINTIC 27    // GPIO27 is tic from geiger counter
-#define PINTOUCH 12  // GPIO12 is touch interface display mode switch
-#define PINADC 26    // GPIO26 to measure battery voltage
-#define TICFACTOR 0.1   // factor between number of tics/second --> mR/hr
+#define PINTIC 27           // GPIO27 is tic from geiger counter
+#define PINTOUCH 12         // GPIO12 is touch interface display mode switch
+#define PINADC 26           // GPIO26 to measure battery voltage
+#define TICFACTOR 0.05      // factor between number of tics/second --> mR/hr
 
 // Program paramters
 #define M_SIZE 1            // Define size of analog meter size (1 = full screen, 0.667 fills 2/3 of screen)
@@ -151,10 +151,10 @@ void loop() {
     displaymode = !displaymode;
     tft.fillScreen(TFT_WHITE);
     tft.setSwapBytes(true);
-    tft.setTextColor(TFT_BLACK);  // Text colour
+    tft.setTextColor(TFT_BLACK);
     if (displaymode) {
       // now switch to history bar graph mode
-      tft.drawString("Batt", 10, TEXTBARY, 2);  // batt indicator lower left corner
+      tft.drawString("Batt", 10, TEXTBARY, 2);   // batt indicator lower left corner
       tft.drawString("V", 90, TEXTBARY, 2);
       tft.drawString("mR/hr", 140, TEXTBARY, 2); // value indicator lower right corner
       Serial.println("Set history bar mode");
@@ -219,6 +219,7 @@ int mrem2perc(float mrem, int maxperc) {
   } else {
     int v = (float(maxperc)/3)*(log10(mrem)+1);
     if (v>maxperc) v=maxperc;
+    if (v<0) v=0;
     return v;
   }
 }
@@ -271,7 +272,7 @@ void analogMeterLog() {
       }
     }
     // Short scale tick length
-    if ((i+45) % 30 != 0) tl = 8;
+    if ((i+45) % 30 != 0) tl = 7;
 
     // Recalculate coords incase tick lenght changed
     x0 = sx * (M_SIZE*100 + tl) + M_SIZE*120;
