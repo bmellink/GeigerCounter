@@ -9,7 +9,7 @@
  
  The Geiger counter comes with a 3x AA battery housing and runs fine on 4.5V. The ESP32 also runs fine on 4.5V. In order
  to monitor the battery condition, I added 2 resistors (20k between 4.5V and GPIO26 and 33k between GPIO26 and GND), so 
- we will can use ADV read on GPIO26 to measure the battery voltage.
+ we will can use ADC read on GPIO26 to measure the battery voltage.
  
  Calculation of radiation dose: 1 Sievert (Sv) = 100 Rem = 100,000 mR ==> 1 μSv = 0.1 mR
  Doses is indicated in mR/hour.
