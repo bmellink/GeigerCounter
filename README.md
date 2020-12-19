@@ -57,6 +57,14 @@ The TTGO ESP32 module requires four things to be setup in your Arduino environme
 
 ```#include <User_Setups/Setup25_TTGO_T_Display.h>    // Setup file for ESP32 and TTGO T-Display ST7789V SPI bus TFT```
 
-4. Then select in Arduino Tools->Board type "ESP32 Dev Module"  
+4. In the same library folder for TFT-eSPI change the following 2 lines in ```User_Setup.h```:
+
+```
+// #define ILI9341_DRIVER	// add comment to this line
+
+#define ST7789_DRIVER      // remove comment from this line
+```
+
+5. Then select in Arduino Tools->Board type "ESP32 Dev Module"  
 
 The Arduino code can be found in the folder [geiger](geiger)
