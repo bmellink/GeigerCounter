@@ -35,17 +35,21 @@
 #include <TFT_eSPI.h>       // Hardware-specific library for TFT display
 #include <SPI.h>
 #include "radiation64.h"    // icon file with yellow radiation symbol
+#include "Pangodream_18650_CL.h"
 
 // Define Hardware PIN numbers
 #define PINTIC 27           // GPIO27 is tic from geiger counter
 #define PINTOUCH 12         // GPIO12 is touch interface display mode switch
-#define PINADC 26           // GPIO26 to measure battery voltage
 #define TICFACTOR 0.05      // factor between number of tics/second --> mR/hr
 
 // Program paramters
 #define M_SIZE 1            // Define size of analog meter size (1 = full screen, 0.667 fills 2/3 of screen)
 #define TOUCHTHRESHOLD 60   // value from touchRead() to consider the button to be touched (needs to be lower)
-#define BATTFACTOR 758.0    // devision factor from ADC read to batt voltage in Volt
+
+#define MIN_USB_VOL 4.9
+#define ADC_PIN 34
+#define CONV_FACTOR 1.8
+#define READS 20
 
 // Bar graph page parameters
 #define TFT_GREY 0x5AEB     // color of bar graph outline
@@ -58,6 +62,8 @@
 #define BARSPACE 1          // Horizontal spacing between bars
 #define BARGREEN 33         // Y threshold value that marks green colored bar
 #define BARORANGE 67        // Y threshold value that marks magenta colored bar (red above)
+
+Pangodream_18650_CL BL(ADC_PIN, CONV_FACTOR, READS);
 
 // variables shared between main code and interrupt code
 hw_timer_t * timer = NULL;
@@ -77,7 +83,6 @@ volatile bool sec10updated = false;     // set to true when sec10_buf is updated
 
 // Other vars
 TFT_eSPI tft = TFT_eSPI();              // TFT custom library
-int batt = 0;                           // raw ADC value (*5) of battery voltage (32 bits)
 bool displaymode = false;               // false= normal mode (analog meter) or true= history bar graph (and batt value)
 
 // #########################################################################
@@ -142,9 +147,6 @@ void setup(void) {
 void loop() {
   static unsigned long flashtime = millis(); // to ensure thr touch pin can only be pressed once/second
 
-  // get battery voltage (simplified walking average over 5)
-  batt = (4*batt/5) + analogRead(PINADC); 
-
   // see if the touch sensor is active
   if (getTouch(PINTOUCH) && flashtime+1000<millis()) {
     // we see touch -> switch display mode
@@ -185,7 +187,7 @@ void loop() {
     tft.drawRightString(buf, 230, TEXTBARY, 2);
     
     // show value for batt
-    dtostrf(float(batt)/(5*BATTFACTOR), 7, 2, buf);
+    dtostrf(BL.getBatteryVolts(), 7, 2, buf);
     tft.drawRightString(buf, 85, 120, 2);
 
     // update bar graph (redraw ever 10 secs)
